@@ -2,6 +2,7 @@ module Proyectil where
 import Data.Fixed (mod')  -- Para trabajar con ángulos en radianes
 import Control.Concurrent (threadDelay)  -- Para agregar pausas
 import System.Process (system)  -- Para limpiar la consola
+import Tools
 
 -- CONSTANTES
 
@@ -66,12 +67,13 @@ calculaPos v0 angle t x0 y0 = (x, y)
     y = round $ (fromIntegral y0) + (fromIntegral v0) * sin theta * t - 0.5 * g * t^2
 
 -- Simular la trayectoria paso a paso con posición inicial (x0, y0)
-simulateTrajectory :: Int -> Int -> (Int, Int) -> [[Char]] -> Double -> IO () 
+simulateTrajectory :: Int -> Int -> (Int, Int) -> [[Char]] -> Double -> IO ()
 simulateTrajectory v0 angle (x0,y0) matrix maxTime = mapM_ simulateStep times
   where
     times = [0, 0.1 .. maxTime]
     simulateStep t = do
       let (x, y) = calculaPos v0 angle t x0 y0
+      
       if x >= 0 && x < length (head matrix) && y >= 0 && y < length matrix 
         then do
           let newMatrix = markMatrix matrix (x, length matrix - y - 1)
@@ -79,8 +81,8 @@ simulateTrajectory v0 angle (x0,y0) matrix maxTime = mapM_ simulateStep times
           threadDelay 100000  -- Pausa de 0.5 segundos (500,000 microsegundos)
         else return ()
 
-dispararProyectil:: (Int, Int) -> Char -> Int -> [[Char]]-> IO()
-dispararProyectil (x, y) h a matriz = simulateTrajectory 35 angle cannonCoord matriz 1000
+dispararProyectil:: Canon (Int, Int, Int, Int, Int) -> Char -> [[Char]]-> IO()
+dispararProyectil canon1 h  matriz = simulateTrajectory 35 angle cannonCoord matriz 50
   where
-    cannonCoord = getCannonCoord (x, y) h a
-    angle = getDegree h a
+    cannonCoord = getCannonCoord (getX canon1, getY canon1) h (getAngle canon1)
+    angle = getDegree h (getAngle canon1)

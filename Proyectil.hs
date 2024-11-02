@@ -3,6 +3,7 @@ import Data.Fixed (mod')  -- Para trabajar con ángulos en radianes
 import Control.Concurrent (threadDelay)  -- Para agregar pausas
 import System.Process (system)  -- Para limpiar la consola
 import Tools
+import System.Random
 
 -- CONSTANTES
 
@@ -13,6 +14,16 @@ g = 9.8
 --Largo de la matriz principal
 largoMatrix :: Int
 largoMatrix = 50
+
+--Obtener Rango de hitbox
+getHitBox :: (Int, Int) -> ((Int, Int), (Int, Int))
+getHitBox (x, y) = ((x-11, x+11), (largoMatrix - y - 2, largoMatrix - y))
+
+--Función que determina si un barco fue impactado o no
+fueImpactado :: (Int, Int) -> ((Int, Int), (Int, Int)) -> Bool
+fueImpactado (x, y) ((lim1, lim2), (lim3, lim4))
+  | (x > lim1 && x < lim2) && (y > lim3 && y < lim4) = True
+  | otherwise = False
 
 -- Función que determina el ángulo según el modo del cañon
 getDegree :: Char -> Int -> Int
@@ -67,22 +78,29 @@ calculaPos v0 angle t x0 y0 = (x, y)
     y = round $ (fromIntegral y0) + (fromIntegral v0) * sin theta * t - 0.5 * g * t^2
 
 -- Simular la trayectoria paso a paso con posición inicial (x0, y0)
-simulateTrajectory :: Int -> Int -> (Int, Int) -> [[Char]] -> Double -> IO ()
-simulateTrajectory v0 angle (x0,y0) matrix maxTime = mapM_ simulateStep times
+simulateTrajectory :: Canon (Int, Int, Int, Int, Int) -> Int -> Int -> (Int, Int) -> [[Char]] -> Double -> IO (Canon (Int, Int, Int, Int, Int))
+simulateTrajectory canon2 v0 degree (x0, y0) matrix maxTime = simulateStep canon2 0
   where
-    times = [0, 0.1 .. maxTime]
-    simulateStep t = do
-      let (x, y) = calculaPos v0 angle t x0 y0
-      
-      if x >= 0 && x < length (head matrix) && y >= 0 && y < length matrix 
-        then do
-          let newMatrix = markMatrix matrix (x, length matrix - y - 1)
-          printMatrix newMatrix
-          threadDelay 100000  -- Pausa de 0.5 segundos (500,000 microsegundos)
-        else return ()
+    simulateStep canon2 t
+      | t > maxTime = return canon2  -- Termina la simulación y devuelve el estado final del cañón
+      | otherwise = do
+          let (x, y) = calculaPos v0 degree t x0 y0
+          if x >= 0 && x < length (head matrix) && y >= 0 && y < length matrix
+            then do
+              if (fueImpactado (x,y) (getHitBox (getX canon2, getY canon2))) then do 
+                                let newCanon = canon2 >>= impactar (mkStdGen 2)
+                                return newCanon
+              else do
+                let newMatrix = markMatrix matrix (x, length matrix - y - 1)
+                printMatrix newMatrix
+                threadDelay 100000  -- Pausa de 0.5 segundos (100,000 microsegundos)
+                simulateStep canon2 (t + 0.1)  -- Llama recursivamente con el nuevo estado del cañón y el tiempo incrementado
+            else do 
+              if (y >= 0) then simulateStep canon2 (t + 0.1) else return canon2  -- Si la posición de la bala sale de los límites, termina la simulación y devuelve el cañón
 
-dispararProyectil:: Canon (Int, Int, Int, Int, Int) -> Char -> [[Char]]-> IO()
-dispararProyectil canon1 h  matriz = simulateTrajectory 35 angle cannonCoord matriz 50
+
+dispararProyectil:: Canon (Int, Int, Int, Int, Int) -> Canon (Int, Int, Int, Int, Int)  -> Char -> [[Char]]-> IO (Canon(Int, Int, Int, Int, Int))
+dispararProyectil canon1 canon2 h matriz = simulateTrajectory canon2 35 angle cannonCoord matriz 50
   where
     cannonCoord = getCannonCoord (getX canon1, getY canon1) h (getAngle canon1)
     angle = getDegree h (getAngle canon1)

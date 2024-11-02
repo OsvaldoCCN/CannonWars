@@ -16,8 +16,9 @@ loop :: (Canon (Int, Int, Int, Int, Int)) -> (Canon (Int, Int, Int, Int, Int)) -
 loop canon1 canon2 matrix = do
     let newMatrix = actualizaMatriz matrix (getX canon1, getY canon1) (getAngle canon1) 'r' --dibuja barco izquierdo
     let newMatrix2 = actualizaMatriz newMatrix (getX canon2, getY canon2) (getAngle canon2) 'l' --dibuja barco derecho
-    system "clear"
-    mapM_ putStrLn newMatrix2 --imprime la matriz
+    printMatrix newMatrix2 --imprime la matriz
+    putStrLn (show $ getLife canon1)
+    putStrLn (show $ getLife canon2)
     c <- getChar
     case c of
         'a' -> do
@@ -45,11 +46,11 @@ loop canon1 canon2 matrix = do
             let newCanon = if (getAngle canon2) > 0 then canon2 >>= (moveAngle (-1)) else canon2 -- Mover ángulo de cañón izquierdo hacia abajo
             loop canon1 newCanon matrix
         'p' -> do
-            dispararProyectil canon1 'r' newMatrix2 -- Barco izquierdo dispara proyectil
-            loop canon1 canon2 matrix
+            newCanon <- dispararProyectil canon1 canon2 'r' newMatrix2 -- Barco izquierdo dispara proyectil
+            loop canon1 newCanon matrix
         'o' -> do
-            dispararProyectil canon2 'l' newMatrix2 -- Barco derecho dispara proyectil
-            loop canon1 canon2 matrix
+            newCanon <- dispararProyectil canon2 canon1 'l' newMatrix2 -- Barco derecho dispara proyectil
+            loop newCanon canon2 matrix
         'q' -> return ()                -- Salir del bucle
         _  -> loop canon1 canon2 matrix -- Ignorar otras teclas y repetir
 ---------------------------------------------------------------------------

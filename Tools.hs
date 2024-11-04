@@ -38,10 +38,10 @@ getY (Dead) = 0
 getY (Canon (_, _, _, y, _)) = y
 
 moveX :: Int -> (Int, Int, Int, Int, Int) -> Canon (Int, Int, Int, Int, Int)
-moveX deltaX (life, fuel, x, y, angle) = Canon (life, fuel, x + deltaX, y, angle)
+moveX deltaX (life, fuel, x, y, angle) = Canon (life, fuel-8, x + deltaX, y, angle)
 
 moveAngle :: Int -> (Int, Int, Int, Int, Int) -> Canon (Int, Int, Int, Int, Int)
-moveAngle deltaAngle (life, fuel, x, y, angle) = Canon (life, fuel, x, y, angle + deltaAngle)
+moveAngle deltaAngle (life, fuel, x, y, angle) = Canon (life, fuel-8, x, y, angle + deltaAngle)
 
 calculaDaño :: StdGen -> Int
 calculaDaño gen
@@ -51,11 +51,11 @@ calculaDaño gen
 
 impactar :: StdGen -> (Int, Int, Int, Int, Int) -> (Canon (Int, Int, Int, Int, Int))
 impactar gen (vida, f, x, y, a)
-    | vida - daño > 0 = (Canon ((vida - daño), f, x, y, a)) 
+    | vida - daño > 0 = (Canon ((vida - daño), f-20, x, y, a)) 
     | otherwise = Dead
     where daño = calculaDaño gen
 
-
-
+resetFuel :: Canon (Int, Int, Int, Int, Int) -> Canon (Int, Int, Int, Int, Int)
+resetFuel (Canon (v,f,x,y,a)) = Canon (v,100,x,y,a)
 
 

@@ -5,6 +5,7 @@ import Graphics
 import Proyectil
 import Tools
 import System.Random
+import Data.IORef
 
 --------------------------------------------------------------------------------------------------
 -- CONSTANTES
@@ -13,49 +14,76 @@ import System.Random
 largoMatrix :: Int
 largoMatrix = 50
 
-loop :: (Canon (Int, Int, Int, Int, Int)) -> (Canon (Int, Int, Int, Int, Int)) -> [[Char]] -> StdGen ->  IO ()
-loop canon1 canon2 matrix gen = do
+loop :: (Canon (Int, Int, Int, Int, Int)) -> (Canon (Int, Int, Int, Int, Int)) -> [[Char]] -> StdGen -> Int -> IO ()
+loop canon1 canon2 matrix gen 0 = do
     let newMatrix = actualizaMatriz matrix (getX canon1, getY canon1) (getAngle canon1) 'r' --dibuja barco izquierdo
     let newMatrix2 = actualizaMatriz newMatrix (getX canon2, getY canon2) (getAngle canon2) 'l' --dibuja barco derecho
     printMatrix newMatrix2 --imprime la matriz
-    putStrLn (show $ getLife canon1)
-    putStrLn (show $ getLife canon2)
-    c <- getChar
-    case c of
-        'a' -> do
-            let newCanon = if (getX canon1) > 12 then  canon1 >>= (moveX (-1)) else canon1 -- Mover barco izquierdo hacia la izquierda
-            loop newCanon canon2 matrix gen
-        'd' -> do
-            let newCanon = if (getX canon1) < 59 then  canon1 >>= (moveX 1) else canon1 -- Mover barco izquierdo hacia la derecha
-            loop newCanon canon2 matrix gen
-        'w' -> do
-            let newCanon = if (getAngle canon1) < 3 then  canon1 >>= (moveAngle 1) else canon1 -- Mover ángulo de cañón derecho hacia arriba
-            loop  newCanon canon2 matrix gen
-        's' -> do
-            let newCanon = if (getAngle canon1) > 0 then  canon1 >>= (moveAngle (-1)) else canon1 -- Mover ángulo de cañón derecho hacia abajo
-            loop newCanon canon2 matrix gen
-        'j' -> do
-            let newCanon = if (getX canon2) > 116 then  canon2 >>= (moveX (-1)) else canon2 -- Mover barco derecho hacia la izquierda
-            loop canon1 newCanon matrix gen
-        'l' -> do
-            let newCanon = if (getX canon2) < 156 then  canon2 >>= (moveX 1) else canon2 -- Mover barco derecho hacia la derecha
-            loop canon1 newCanon matrix gen
-        'i' -> do
-            let newCanon = if (getAngle canon2) < 3 then canon2 >>= (moveAngle 1) else canon2 -- Mover ángulo de cañón izquierdo hacia arriba
-            loop canon1 newCanon matrix gen
-        'k' -> do
-            let newCanon = if (getAngle canon2) > 0 then canon2 >>= (moveAngle (-1)) else canon2 -- Mover ángulo de cañón izquierdo hacia abajo
-            loop canon1 newCanon matrix gen
-        'p' -> do
-            newCanon <- dispararProyectil canon1 canon2 'r' newMatrix2 gen -- Barco izquierdo dispara proyectil
-            let nextGen = snd (random gen :: (Int, StdGen))
-            loop canon1 newCanon matrix nextGen
-        'o' -> do
-            newCanon <- dispararProyectil canon2 canon1 'l' newMatrix2 gen -- Barco derecho dispara proyectil
-            let nextGen = snd (random gen :: (Int, StdGen))
-            loop newCanon canon2 matrix nextGen
-        'q' -> return ()                -- Salir del bucle
-        _  -> loop canon1 canon2 matrix gen-- Ignorar otras teclas y repetir
+    putStrLn (show $ getFuel canon1)
+    putStrLn (show $ getFuel canon2)
+    if (getFuel canon1 <= 8) 
+        then loop (resetFuel canon1) canon2 matrix gen 1
+        else do 
+            c <- getChar
+            case c of
+                'a' -> do
+                    let newCanon = if (getX canon1) > 12 then  canon1 >>= (moveX (-1)) else canon1 -- Mover barco izquierdo hacia la izquierda
+                    loop newCanon canon2 matrix gen 0
+                'd' -> do
+                    let newCanon = if (getX canon1) < 59 then  canon1 >>= (moveX 1) else canon1 -- Mover barco izquierdo hacia la derecha
+                    loop newCanon canon2 matrix gen 0
+                'w' -> do
+                    let newCanon = if (getAngle canon1) < 3 then  canon1 >>= (moveAngle 1) else canon1 -- Mover ángulo de cañón derecho hacia arriba
+                    loop  newCanon canon2 matrix gen 0
+                's' -> do
+                    let newCanon = if (getAngle canon1) > 0 then  canon1 >>= (moveAngle (-1)) else canon1 -- Mover ángulo de cañón derecho hacia abajo
+                    loop newCanon canon2 matrix gen 0
+                'p' -> do
+                    if ((getFuel canon1) < 20) 
+                        then loop canon1 canon2 matrix gen 0
+                    else do
+                        newCanon <- dispararProyectil canon1 canon2 'r' newMatrix2 gen -- Barco izquierdo dispara proyectil
+                        let nextGen = snd (random gen :: (Int, StdGen))
+                        loop (resetFuel canon1) newCanon matrix nextGen 1
+                't' -> do
+                    loop (resetFuel canon1) canon2 matrix gen 1
+                'q' -> return ()                -- Salir del bucle
+                _  -> loop canon1 canon2 matrix gen 0-- Ignorar otras teclas y repetir
+        
+loop canon1 canon2 matrix gen 1 = do
+    let newMatrix = actualizaMatriz matrix (getX canon1, getY canon1) (getAngle canon1) 'r' --dibuja barco izquierdo
+    let newMatrix2 = actualizaMatriz newMatrix (getX canon2, getY canon2) (getAngle canon2) 'l' --dibuja barco derecho
+    printMatrix newMatrix2 --imprime la matriz
+    putStrLn (show $ getFuel canon1)
+    putStrLn (show $ getFuel canon2)
+    if (getFuel canon2 <= 8) 
+        then loop canon1 (resetFuel canon2) matrix gen 0
+        else do 
+            c <- getChar
+            case c of
+                'j' -> do
+                    let newCanon = if (getX canon2) > 116 then  canon2 >>= (moveX (-1)) else canon2 -- Mover barco derecho hacia la izquierda
+                    loop canon1 newCanon matrix gen 1
+                'l' -> do
+                    let newCanon = if (getX canon2) < 156 then  canon2 >>= (moveX 1) else canon2 -- Mover barco derecho hacia la derecha
+                    loop canon1 newCanon matrix gen 1
+                'i' -> do
+                    let newCanon = if (getAngle canon2) < 3 then canon2 >>= (moveAngle 1) else canon2 -- Mover ángulo de cañón izquierdo hacia arriba
+                    loop canon1 newCanon matrix gen 1
+                'k' -> do
+                    let newCanon = if (getAngle canon2) > 0 then canon2 >>= (moveAngle (-1)) else canon2 -- Mover ángulo de cañón izquierdo hacia abajo
+                    loop canon1 newCanon matrix gen 1
+                'o' -> do
+                    if (getFuel canon2 < 20) 
+                        then loop canon1 canon2 matrix gen 1
+                    else do
+                        newCanon <- dispararProyectil canon2 canon1 'l' newMatrix2 gen -- Barco derecho dispara proyectil
+                        let nextGen = snd (random gen :: (Int, StdGen))
+                        loop newCanon (resetFuel canon2) matrix nextGen 0
+                't' -> do
+                    loop canon1 (resetFuel canon2) matrix gen 0
+                'q' -> return ()                -- Salir del bucle
+                _  -> loop canon1 canon2 matrix gen 1-- Ignorar otras teclas y repetir
 ---------------------------------------------------------------------------
 main :: IO ()
 main = do
@@ -65,5 +93,6 @@ main = do
     gen <- getStdGen
     let canon1 = Canon (30, 100, 20, 43, 0)
     let canon2 = Canon (30, 100, 150, 43, 0)
-    let matrix = initialMatrix    -- Se invoca la matriz inicial (Graphics.hs)
-    loop canon1 canon2 matrix gen           -- Coordenadas iniciales
+    let matrix = initialMatrix -- Se invoca la matriz inicial (Graphics.hs)
+    let prob = fst (randomR (0,1) gen :: (Int, StdGen))
+    loop canon1 canon2 matrix gen prob

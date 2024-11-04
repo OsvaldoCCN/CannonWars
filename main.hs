@@ -16,9 +16,16 @@ largoMatrix = 50
 
 loop :: (Canon (Int, Int, Int, Int, Int)) -> (Canon (Int, Int, Int, Int, Int)) -> [[Char]] -> StdGen -> Int -> IO ()
 loop canon1 canon2 matrix gen 0 = do
-    let newMatrix = actualizaMatriz matrix (getX canon1, getY canon1) (getAngle canon1) 'r' --dibuja barco izquierdo
-    let newMatrix2 = actualizaMatriz newMatrix (getX canon2, getY canon2) (getAngle canon2) 'l' --dibuja barco derecho
-    printMatrix newMatrix2 --imprime la matriz
+    system "clear" -- Limpia la consola
+    let smallMatrix1 = tipoBarco 'r' (getAngle canon1)
+    let smallMatrix2 = tipoBarco 'l' (getAngle canon2)
+    let smallMatrix3 = mostrarDatos canon1 'r'
+    let smallMatrix4 = mostrarDatos canon2 'l'
+    let newMatrix1 = actualizaMatriz matrix smallMatrix1 ((getX canon1),(getY canon1))
+    let newMatrix2 = actualizaMatriz newMatrix1 smallMatrix2 ((getX canon2),(getY canon2))
+    let newMatrix3 = actualizaMatriz newMatrix2 smallMatrix3 (200,20)
+    let newMatrix4 = actualizaMatriz newMatrix3 smallMatrix4 (200,30)
+    mapM_ putStrLn newMatrix4 --imprime la matriz
     putStrLn (show $ getFuel canon1)
     putStrLn (show $ getFuel canon2)
     if (getFuel canon1 <= 8) 
@@ -51,9 +58,16 @@ loop canon1 canon2 matrix gen 0 = do
                 _  -> loop canon1 canon2 matrix gen 0-- Ignorar otras teclas y repetir
         
 loop canon1 canon2 matrix gen 1 = do
-    let newMatrix = actualizaMatriz matrix (getX canon1, getY canon1) (getAngle canon1) 'r' --dibuja barco izquierdo
-    let newMatrix2 = actualizaMatriz newMatrix (getX canon2, getY canon2) (getAngle canon2) 'l' --dibuja barco derecho
-    printMatrix newMatrix2 --imprime la matriz
+    system "clear" -- Limpia la consola
+    let smallMatrix1 = tipoBarco 'r' (getAngle canon1)
+    let smallMatrix2 = tipoBarco 'l' (getAngle canon2)
+    let smallMatrix3 = mostrarDatos canon1 'r'
+    let smallMatrix4 = mostrarDatos canon2 'l'
+    let newMatrix1 = actualizaMatriz matrix smallMatrix1 ((getX canon1),(getY canon1))
+    let newMatrix2 = actualizaMatriz newMatrix1 smallMatrix2 ((getX canon2),(getY canon2))
+    let newMatrix3 = actualizaMatriz newMatrix2 smallMatrix3 (200,20)
+    let newMatrix4 = actualizaMatriz newMatrix3 smallMatrix4 (200,30)
+    mapM_ putStrLn newMatrix4 --imprime la matriz
     putStrLn (show $ getFuel canon1)
     putStrLn (show $ getFuel canon2)
     if (getFuel canon2 <= 8) 

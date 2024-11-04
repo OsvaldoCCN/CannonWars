@@ -51,11 +51,11 @@ calculaDaño gen
 
 impactar :: StdGen -> (Int, Int, Int, Int, Int) -> (Canon (Int, Int, Int, Int, Int))
 impactar gen (vida, f, x, y, a)
-    | vida - daño > 0 = (Canon ((vida - daño), f-20, x, y, a)) 
+    | vida - daño > 0 = (Canon ((vida - daño), f, x, y, a)) 
     | otherwise = Dead
     where daño = calculaDaño gen
 
 resetFuel :: Canon (Int, Int, Int, Int, Int) -> Canon (Int, Int, Int, Int, Int)
-resetFuel (Canon (v,f,x,y,a)) = Canon (v,100,x,y,a)
-
+resetFuel Dead = Dead
+resetFuel (Canon (v,f,x,y,a)) = Canon (v, 100, x, y, a)
 

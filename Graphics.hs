@@ -1,18 +1,12 @@
 module Graphics where
-
+import Tools
 --CONSTANTES
 
 -- Función que actualiza la matriz con los barcos
-actualizaMatriz :: [[Char]] -> (Int, Int) -> Int -> Char -> [[Char]]
-actualizaMatriz bigMatrix (x, y) a h = 
+actualizaMatriz :: [[Char]] -> [[Char]] -> (Int,Int)-> [[Char]]
+actualizaMatriz bigMatrix smallMatrix (x,y) =
     zipWith replaceRow [0..] bigMatrix
   where
-    -- Limitamos `a` para que esté entre 0 y 3
-    limitedA = max 0 (min 3 a)
-
-    -- Seleccionamos el tipo de barco según la orientación `h` y el ángulo `limitedA`
-    smallMatrix = tipoBarco h limitedA --(Graphics.hs)
-
     smallRows = length smallMatrix
     smallCols = length (head smallMatrix)
 
@@ -28,6 +22,23 @@ actualizaMatriz bigMatrix (x, y) a h =
     
     replaceCols bigRow smallRow startCol =
         take startCol bigRow ++ smallRow ++ drop (startCol + smallCols) bigRow
+
+mostrarDatos :: Canon (Int, Int, Int, Int, Int) -> Char -> [[Char]]
+mostrarDatos canon c = case c of
+    'r' ->
+        ["B A R C O  D E R E C H O" 
+        ,"Vida: " ++ show (getLife canon)
+        , "Combustible: " ++ show (getFuel canon)
+        , "Posición: (" ++ show (getX canon) ++ ", " ++ show (getY canon) ++ ")"
+        , "Ángulo: " ++ show (getAngle canon)
+        ]
+    'l' -> 
+        ["B A R C O  I Z Q U I E R D O"
+        ,"Vida: " ++ show (getLife canon)
+        , "Combustible: " ++ show (getFuel canon)
+        , "Posición: (" ++ show (getX canon) ++ ", " ++ show (getY canon) ++ ")"
+        , "Ángulo: " ++ show (getAngle canon)
+        ]
 
 -- Formatos barcos
 tipoBarco :: Char -> Int -> [[Char]]
@@ -93,12 +104,12 @@ initialMatrix =
           , "|                                                                                                                                                                       |                                            "
           , "|                                                                                                                                                                       |                                            "
           , "|                                                                                                                                                                       |                                            "
-          , "|                                                                                                                                                                       |        Canon1            Canon2            "
           , "|                                                                                                                                                                       |                                            "
           , "|                                                                                                                                                                       |                                            "
-          , "|                                                                                                                                                                       |      Health: 30         Health: 30         "
           , "|                                                                                                                                                                       |                                            "
-          , "|                                                                                                                                                                       |       Fuel: 50          Fuel: 50           "
+          , "|                                                                                                                                                                       |                                            "
+          , "|                                                                                                                                                                       |                                            "
+          , "|                                                                                                                                                                       |                                            "
           , "|                                                                                                                                                                       |                                            "
           , "|                                                                                                                                                                       |                                            "
           , "|                                                                                                                                                                       |                                            "

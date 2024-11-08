@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use guards" #-}
 module Graphics where
 import Tools
 --CONSTANTES
@@ -23,19 +25,40 @@ actualizaMatriz bigMatrix smallMatrix (x,y) =
     replaceCols bigRow smallRow startCol =
         take startCol bigRow ++ smallRow ++ drop (startCol + smallCols) bigRow
 
+-- Función auxiliar para crear una barra de vida visual con colores.
+mostrarVida :: Int -> Int -> String
+mostrarVida maxVida vida = 
+  let vidaPorcentaje = (vida * 100) `div` maxVida
+      vidaBarra = vidaPorcentaje `div` 5  -- Cambiado para tener más barras
+      vidaRestante = 20 - vidaBarra
+      color = if vidaPorcentaje <= 20 then "\x1b[31m"  -- Rojo para poca vida
+              else if vidaPorcentaje <= 50 then "\x1b[33m"  -- Amarillo para vida media
+              else "\x1b[32m"  -- Verde para vida alta
+  in color ++ replicate vidaBarra '█' ++ "\x1b[0m" ++ replicate vidaRestante '░' ++ " " ++ show vidaPorcentaje ++ "%" ++ " (" ++ show vida ++ ")"
+
+-- Función auxiliar para crear una barra de combustible visual con colores.
+mostrarCombustible :: Int -> Int -> String
+mostrarCombustible maxFuel fuel = 
+  let fuelPorcentaje = (fuel * 100) `div` maxFuel
+      fuelBarra = fuelPorcentaje `div` 5  -- Cambiado para tener más barras
+      fuelRestante = 20 - fuelBarra
+  in "\x1b[33m" ++ replicate fuelBarra '█' ++ "\x1b[0m" ++ replicate fuelRestante '░' ++ " " ++ show fuelPorcentaje ++ "%" ++ " (" ++ show fuel ++ ")"
+
+
+-- Función mostrarDatos actualizada para usar las barras con colores.
 mostrarDatos :: Canon (Int, Int, Int, Int, Int) -> Char -> [[Char]]
 mostrarDatos canon c = case c of
     'r' ->
         ["B A R C O  D E R E C H O" 
-        ,"Vida: " ++ show (getLife canon)
-        , "Combustible: " ++ show (getFuel canon)
+        , "Vida:        " ++ mostrarVida 30 (getLife canon)
+        , "Combustible: " ++ mostrarCombustible 100 (getFuel canon)
         , "Posición: (" ++ show (getX canon) ++ ", " ++ show (getY canon) ++ ")"
         , "Ángulo: " ++ show (getAngle canon)
         ]
     'l' -> 
         ["B A R C O  I Z Q U I E R D O"
-        ,"Vida: " ++ show (getLife canon)
-        , "Combustible: " ++ show (getFuel canon)
+        , "Vida:        " ++ mostrarVida 30 (getLife canon)
+        , "Combustible: " ++ mostrarCombustible 100 (getFuel canon)
         , "Posición: (" ++ show (getX canon) ++ ", " ++ show (getY canon) ++ ")"
         , "Ángulo: " ++ show (getAngle canon)
         ]

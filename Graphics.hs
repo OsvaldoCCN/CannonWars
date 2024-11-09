@@ -2,6 +2,8 @@
 {-# HLINT ignore "Use guards" #-}
 module Graphics where
 import Tools
+import System.IO (hFlush, stdout)
+import System.IO (hSetEcho, hSetBuffering, stdin, BufferMode(NoBuffering))
 --CONSTANTES
 
 -- Función que actualiza la matriz con los barcos
@@ -49,19 +51,19 @@ mostrarCombustible maxFuel fuel =
 mostrarDatos :: Canon (Int, Int, Int, Int, Int) -> Char -> [[Char]]
 mostrarDatos canon c = case c of
     'r' ->
-        ["B A R C O  D E R E C H O" 
+        ["B A R C O  I Z Q U I E R D O" 
         , "Vida:        " ++ mostrarVida 30 (getLife canon)
         , "Combustible: " ++ mostrarCombustible 100 (getFuel canon)
-        , "Posición: (" ++ show (getX canon) ++ ", " ++ show (getY canon) ++ ")"
-        , "Ángulo: " ++ show (getAngle canon)
         ]
     'l' -> 
-        ["B A R C O  I Z Q U I E R D O"
+        ["B A R C O   D E R E C H O"
         , "Vida:        " ++ mostrarVida 30 (getLife canon)
         , "Combustible: " ++ mostrarCombustible 100 (getFuel canon)
-        , "Posición: (" ++ show (getX canon) ++ ", " ++ show (getY canon) ++ ")"
-        , "Ángulo: " ++ show (getAngle canon)
         ]
+
+turno :: Int  -> [[Char]]
+turno 1 = ["Turno Actual : B A R C O   D E R E C H O"]
+turno 0 = ["Turno Actual : B A R C O  I Z Q U I E R D O"]
 
 -- Formatos barcos
 tipoBarco :: Char -> Int -> [[Char]]
@@ -125,11 +127,11 @@ initialMatrix :: [[Char]]
 initialMatrix =  
           [ "|                                                                                                                                                                       |                                            "
           , "|                                                                                                                                                                       |                                            "
+          , "|                                                                                                                                                                       |       Costos de Combustible:               "
           , "|                                                                                                                                                                       |                                            "
-          , "|                                                                                                                                                                       |                                            "
-          , "|                                                                                                                                                                       |                                            "
-          , "|                                                                                                                                                                       |                                            "
-          , "|                                                                                                                                                                       |                                            "
+          , "|                                                                                                                                                                       |         Mover Barco    = 4 u               "
+          , "|                                                                                                                                                                       |         Mover Cañon    = 4 u               "
+          , "|                                                                                                                                                                       |         Disparar Cañon = 20 u              "
           , "|                                                                                                                                                                       |                                            "
           , "|                                                                                                                                                                       |                                            "
           , "|                                                                                                                                                                       |                                            "
@@ -172,6 +174,153 @@ initialMatrix =
           , "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                            "
           , "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                            "
           ]
+
+
+pantallaFin1 :: IO()
+pantallaFin1 = do
+    putStrLn "|                                                                                                                                                                       |===================================="
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                  ██████    ████    ██      ██  ████████                                                                                               |"
+    putStrLn "|                                ██        ██    ██  ████  ████  ██                                                                                                     |"
+    putStrLn "|                                ██  ████  ████████  ██  ██  ██  ██████                                                                                                 |"
+    putStrLn "|                                ██    ██  ██    ██  ██      ██  ██                                                                                                     | Instrucciones:                     "
+    putStrLn "|                                  ██████  ██    ██  ██      ██  ████████                                                                                               | - Teclas barco izquierdo:          "
+    putStrLn "|                                                                                                                                                                       |   - 'a' Mover a la izquierda       "
+    putStrLn "|                                                     ████    ██      ██  ████████  ██████                                                                              |   - 'd' Mover a la derecha         "
+    putStrLn "|                                                   ██    ██  ██      ██  ██        ██    ██                                                                            |   - 'w' Subir cañón                "
+    putStrLn "|                                                   ██    ██  ██      ██  ██████    ██████                                                                              |   - 's' Bajar cañón                "
+    putStrLn "|                                                   ██    ██    ██  ██    ██        ██    ██                                                                            |   - 'e' Disparar proyectil         "
+    putStrLn "|                                                     ████        ██      ████████  ██    ██                                                                            |"
+    putStrLn "|                                                                                                                                                                       | - Teclas barco derecho:            "
+    putStrLn "|                                                                                                                                                                       |   - 'j' Mover a la izquierda       "
+    putStrLn "|                                                                                                                                                                       |   - 'l' Mover a la derecha       "
+    putStrLn "|                                                                                                                                                                       |   - 'i' Subir cañon       "
+    putStrLn "|                                                                                                                                                                       |   - 'k' bajar cañon      "
+    putStrLn "|                                                                                                                                                                       |   - 'a' Disparar Cañon       "
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |  - 'q' Para salir"
+    putStrLn "|                                                                                                                                                                       |  - 'r' Para volver a jugar"
+    putStrLn "|                                                                                                                                                                       |" 
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|           \ESC[38;5;240m██████████████\ESC[0m                                                                                                                                              |"
+    putStrLn "|     \ESC[38;5;240m████████\ESC[38;5;226m██████████\ESC[38;5;240m████████\ESC[0m                                                                                                                                        |"
+    putStrLn "|     \ESC[38;5;240m██\ESC[0m    \ESC[38;5;240m██\ESC[38;5;226m████\ESC[38;5;231m████\ESC[38;5;226m██\ESC[38;5;240m██\ESC[0m    \ESC[38;5;240m██\ESC[0m                                                                                                   \ESC[38;5;244m██\ESC[38;5;240m██\ESC[38;5;244m██\ESC[38;5;240m██████\ESC[38;5;244m████\ESC[0m                     |"
+    putStrLn "|     \ESC[38;5;240m██\ESC[0m    \ESC[38;5;240m██\ESC[38;5;226m██████\ESC[38;5;231m██\ESC[38;5;226m██\ESC[38;5;240m██\ESC[0m    \ESC[38;5;240m██\ESC[0m                                                                                                   \ESC[38;5;240m██████\ESC[38;5;244m████████\ESC[38;5;240m██\ESC[0m                     |"
+    putStrLn "|       \ESC[38;5;240m██\ESC[0m  \ESC[38;5;240m██\ESC[38;5;226m██████████\ESC[38;5;240m██\ESC[0m  \ESC[38;5;240m██\ESC[0m                                                                                                     \ESC[38;5;240m██\ESC[38;5;251m████████████\ESC[38;5;244m██\ESC[0m                     |"
+    putStrLn "|         \ESC[38;5;240m████\ESC[38;5;226m██████████\ESC[38;5;240m████\ESC[0m                                                                                                       \ESC[38;5;251m████████\ESC[38;5;244m██\ESC[38;5;251m██\ESC[38;5;244m████\ESC[0m                     |"
+    putStrLn "|             \ESC[38;5;240m██\ESC[38;5;226m██████\ESC[38;5;240m██\ESC[0m                                                                                                           \ESC[38;5;251m██\ESC[38;5;234m████\ESC[38;5;251m████\ESC[38;5;234m████\ESC[38;5;251m██\ESC[0m                     |"
+    putStrLn "|               \ESC[38;5;240m██\ESC[38;5;226m██\ESC[38;5;240m██\ESC[0m                                                                                                             \ESC[38;5;244m██\ESC[38;5;251m████\ESC[38;5;240m████\ESC[38;5;251m██\ESC[38;5;244m████\ESC[0m                     |"
+    putStrLn "|               \ESC[38;5;240m██\ESC[38;5;226m██\ESC[38;5;240m██\ESC[0m                                                                                                             \ESC[38;5;244m██\ESC[38;5;234m████████████\ESC[38;5;244m██\ESC[0m                     |"
+    putStrLn "|               \ESC[38;5;240m██\ESC[38;5;226m██\ESC[38;5;240m██\ESC[0m                                                                                                             \ESC[38;5;244m████████\ESC[38;5;240m██\ESC[38;5;244m██\ESC[38;5;240m██\ESC[38;5;244m██\ESC[0m                     |"
+    putStrLn "|             \ESC[38;5;240m██\ESC[38;5;226m██████\ESC[38;5;240m██\ESC[0m                                                                                                                                                |"
+    putStrLn "|           \ESC[38;5;240m██\ESC[38;5;226m██████████\ESC[38;5;240m██\ESC[0m                                                                                                                                              |"
+    putStrLn "|           \ESC[38;5;240m██████████████\ESC[0m                                                                                                                                              |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+
+pantallaFin2 :: IO()
+pantallaFin2 = do
+    putStrLn "|                                                                                                                                                                       |===================================="
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                  ██████    ████    ██      ██  ████████                                                                                               |"
+    putStrLn "|                                ██        ██    ██  ████  ████  ██                                                                                                     |"
+    putStrLn "|                                ██  ████  ████████  ██  ██  ██  ██████                                                                                                 |"
+    putStrLn "|                                ██    ██  ██    ██  ██      ██  ██                                                                                                     |"
+    putStrLn "|                                  ██████  ██    ██  ██      ██  ████████                                                                                               |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                     ████    ██      ██  ████████  ██████                                                                              |"
+    putStrLn "|                                                   ██    ██  ██      ██  ██        ██    ██                                                                            |"
+    putStrLn "|                                                   ██    ██  ██      ██  ██████    ██████                                                                              |"
+    putStrLn "|                                                   ██    ██    ██  ██    ██        ██    ██                                                                            |"
+    putStrLn "|                                                     ████        ██      ████████  ██    ██                                                                            |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |  - 'q' Para salir"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |  - 'r' Para volver a jugar"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |" 
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                       \ESC[38;5;240m██████████████\ESC[0m                  |"
+    putStrLn "|                                                                                                                                 \ESC[38;5;240m████████\ESC[38;5;226m██████████\ESC[38;5;240m████████\ESC[0m            |"
+    putStrLn "|           \ESC[38;5;244m██\ESC[38;5;240m██\ESC[38;5;244m██\ESC[38;5;240m██████\ESC[38;5;244m████\ESC[0m                                                                                                      \ESC[38;5;240m██\ESC[0m    \ESC[38;5;240m██\ESC[38;5;226m████\ESC[38;5;231m████\ESC[38;5;226m██\ESC[38;5;240m██\ESC[0m    \ESC[38;5;240m██\ESC[0m            |"
+    putStrLn "|           \ESC[38;5;240m██████\ESC[38;5;244m████████\ESC[38;5;240m██\ESC[0m                                                                                                      \ESC[38;5;240m██\ESC[0m    \ESC[38;5;240m██\ESC[38;5;226m██████\ESC[38;5;231m██\ESC[38;5;226m██\ESC[38;5;240m██\ESC[0m    \ESC[38;5;240m██\ESC[0m            |"
+    putStrLn "|           \ESC[38;5;240m██\ESC[38;5;251m████████████\ESC[38;5;244m██\ESC[0m                                                                                                        \ESC[38;5;240m██\ESC[0m  \ESC[38;5;240m██\ESC[38;5;226m██████████\ESC[38;5;240m██\ESC[0m  \ESC[38;5;240m██\ESC[0m              |"
+    putStrLn "|           \ESC[38;5;251m████████\ESC[38;5;244m██\ESC[38;5;251m██\ESC[38;5;244m████\ESC[0m                                                                                                          \ESC[38;5;240m████\ESC[38;5;226m██████████\ESC[38;5;240m████\ESC[0m                |"
+    putStrLn "|           \ESC[38;5;251m██\ESC[38;5;234m████\ESC[38;5;251m████\ESC[38;5;234m████\ESC[38;5;251m██\ESC[0m                                                                                                              \ESC[38;5;240m██\ESC[38;5;226m██████\ESC[38;5;240m██\ESC[0m                    |"
+    putStrLn "|           \ESC[38;5;244m██\ESC[38;5;251m████\ESC[38;5;240m████\ESC[38;5;251m██\ESC[38;5;244m████\ESC[0m                                                                                                                \ESC[38;5;240m██\ESC[38;5;226m██\ESC[38;5;240m██\ESC[0m                      |"
+    putStrLn "|           \ESC[38;5;244m██\ESC[38;5;234m████████████\ESC[38;5;244m██\ESC[0m                                                                                                                \ESC[38;5;240m██\ESC[38;5;226m██\ESC[38;5;240m██\ESC[0m                      |"
+    putStrLn "|           \ESC[38;5;244m████████\ESC[38;5;240m██\ESC[38;5;244m██\ESC[38;5;240m██\ESC[38;5;244m██\ESC[0m                                                                                                                \ESC[38;5;240m██\ESC[38;5;226m██\ESC[38;5;240m██\ESC[0m                      |"
+    putStrLn "|                                                                                                                                         \ESC[38;5;240m██\ESC[38;5;226m██████\ESC[38;5;240m██\ESC[0m                    |"
+    putStrLn "|                                                                                                                                       \ESC[38;5;240m██\ESC[38;5;226m██████████\ESC[38;5;240m██\ESC[0m                  |"
+    putStrLn "|                                                                                                                                       \ESC[38;5;240m██████████████\ESC[0m                  |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+    putStrLn "|                                                                                                                                                                       |"
+
+
+pantallaInicio :: IO()
+pantallaInicio = do
+  putStrLn "|                                                                                                                                                                       |===================================="
+  putStrLn "|                                                                  ████    ██  ███████  ██     ██  ███████  ██                                                          |     \ESC[32m¡Bienvenido a CannonWars!\ESC[0m      "
+  putStrLn "|                                                                  ██ ██   ██  ██   ██   ██   ██   ██   ██  ██                                                          |"
+  putStrLn "|                                                                  ██  ██  ██  ███████   ██   ██   ███████  ██                                                          |   El objetivo del juego es destruir"
+  putStrLn "|                                                                  ██   ██ ██  ██   ██    ██ ██    ██   ██  ██                                                          |   el barco enemigo antes de que él "
+  putStrLn "|                                                                  ██    ████  ██   ██     ███     ██   ██  █████                                                       |   te destruya a ti.                "
+  putStrLn "|                                                                                                                                                                       |"
+  putStrLn "|                                                                 ███████  ███████   ██████    ██  ██    ██  █████                                                      |"
+  putStrLn "|                                                                 ██          ██     ██   ██   ██  ██  ██    ██                                                         | Instrucciones:                     "
+  putStrLn "|                                                                 ███████     ██     ██████    ██  ████      ████                                                       | - Teclas barco izquierdo:          "
+  putStrLn "|                                                                      ██     ██     ██   ██   ██  ██  ██    ██                                                         |   - 'a' Mover a la izquierda       "  
+  putStrLn "|                                                                 ███████     ██     ██    ██  ██  ██    ██  █████                                                      |   - 'd' Mover a la derecha         " 
+  putStrLn "|                                                                                                                                                                       |   - 'w' Subir cañón                "
+  putStrLn "|                                                                                                                                                                       |   - 's' Bajar cañón                "
+  putStrLn "|                                                                                                                                                                       |   - 'e' Disparar proyectil         "
+  putStrLn "|                                                                                                                                                                       |"
+  putStrLn "|                                                                                                                                                                       | - Teclas barco derecho:            "
+  putStrLn "|                                                            \ESC[38;5;240m██\ESC[0m                                                                                                         |   - 'j' Mover a la izquierda       "
+  putStrLn "|                                                          \ESC[38;5;240m██\ESC[38;5;250m██\ESC[38;5;240m██\ESC[0m                                                                                                       |   - 'l' Mover a la derecha         "
+  putStrLn "|                                                        \ESC[38;5;240m██\ESC[38;5;250m██████\ESC[38;5;240m██\ESC[0m                                                                                                     |   - 'i' Subir cañón                "
+  putStrLn "|                                                        \ESC[38;5;240m██\ESC[38;5;26m██\ESC[38;5;250m██████\ESC[38;5;240m██\ESC[0m                                                                                                   |   - 'k' Bajar cañón                "
+  putStrLn "|                                                      \ESC[38;5;240m██\ESC[38;5;26m██████\ESC[38;5;250m██\ESC[38;5;252m████\ESC[38;5;240m██\ESC[0m                                                                                                 |   - 'o' Disparar proyectil         "
+  putStrLn "|                                                      \ESC[38;5;240m██\ESC[38;5;26m████\ESC[38;5;17m████\ESC[38;5;252m██████\ESC[38;5;240m██\ESC[0m                                                                                               |"
+  putStrLn "|                                                      \ESC[38;5;240m██\ESC[38;5;26m████\ESC[38;5;17m██████\ESC[38;5;252m██████\ESC[38;5;240m██\ESC[0m                          \ESC[38;5;240m██\ESC[0m                                                                 |"
+  putStrLn "|                                                      \ESC[38;5;240m██\ESC[38;5;26m██\ESC[38;5;17m██████████\ESC[38;5;252m██████\ESC[38;5;240m██\ESC[0m                      \ESC[38;5;240m██\ESC[38;5;17m██\ESC[38;5;240m██\ESC[0m                                                               |  - 'q' Salir del juego            "
+  putStrLn "|                                                      \ESC[38;5;240m██\ESC[38;5;26m██\ESC[38;5;17m████████████\ESC[38;5;252m██████\ESC[38;5;240m██\ESC[0m        \ESC[38;5;240m██\ESC[0m        \ESC[38;5;240m██\ESC[38;5;250m██\ESC[38;5;17m████\ESC[38;5;240m██\ESC[0m                                                             |  - 't' Finalizar turno"
+  putStrLn "|                                              \ESC[38;5;240m██████████\ESC[38;5;26m██\ESC[38;5;17m██████████████\ESC[38;5;252m██████\ESC[38;5;240m██\ESC[0m    \ESC[38;5;240m██\ESC[38;5;231m██\ESC[38;5;240m██\ESC[0m    \ESC[38;5;240m██\ESC[38;5;250m██████\ESC[38;5;26m██\ESC[38;5;240m██\ESC[0m                                                             |  Presiona ENTER para comenzar...  "
+  putStrLn "|                                            \ESC[38;5;240m██\ESC[38;5;88m██████\ESC[38;5;240m████\ESC[38;5;26m██\ESC[38;5;17m████████████████\ESC[38;5;252m██████\ESC[38;5;240m████\ESC[38;5;231m██\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;240m████\ESC[38;5;252m██\ESC[38;5;250m████\ESC[38;5;231m██\ESC[38;5;240m██\ESC[0m                                                               |"
+  putStrLn "|                                          \ESC[38;5;240m██\ESC[38;5;124m██\ESC[38;5;88m████\ESC[38;5;240m██\ESC[0m  \ESC[38;5;240m██\ESC[38;5;17m████████████████████\ESC[38;5;252m████████████\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;252m████\ESC[38;5;250m████\ESC[38;5;231m██\ESC[38;5;240m██\ESC[0m                                                               |"
+  putStrLn "|                                          \ESC[38;5;240m████\ESC[38;5;88m██\ESC[38;5;240m████\ESC[0m  \ESC[38;5;240m██\ESC[38;5;88m██\ESC[38;5;17m████████████████████\ESC[38;5;252m██████\ESC[38;5;17m██\ESC[38;5;252m████\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;252m██\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;240m██\ESC[0m          \ESC[38;5;240m██\ESC[0m                                                     |"
+  putStrLn "|                                            \ESC[38;5;240m██████\ESC[0m  \ESC[38;5;240m████\ESC[38;5;88m████\ESC[38;5;17m████████████████████\ESC[38;5;252m██████\ESC[38;5;17m██\ESC[38;5;252m████\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;240m██\ESC[0m        \ESC[38;5;240m██\ESC[38;5;17m██\ESC[38;5;240m██\ESC[0m                                                   |"
+  putStrLn "|                                              \ESC[38;5;240m██\ESC[38;5;124m██\ESC[38;5;240m████\ESC[38;5;88m████████\ESC[38;5;17m████████████████████\ESC[38;5;252m████████████\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;240m██\ESC[0m        \ESC[38;5;240m██\ESC[38;5;250m██\ESC[38;5;17m████\ESC[38;5;240m██\ESC[0m                                                 |"
+  putStrLn "|                                                \ESC[38;5;240m██\ESC[38;5;124m████\ESC[38;5;88m██████████\ESC[38;5;17m████████████████████\ESC[38;5;252m██████\ESC[38;5;17m██\ESC[38;5;252m████\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;240m██\ESC[0m    \ESC[38;5;240m██\ESC[38;5;250m██████\ESC[38;5;26m██\ESC[38;5;240m██\ESC[0m                                                 |"
+  putStrLn "|                                                  \ESC[38;5;240m██\ESC[38;5;124m██\ESC[38;5;88m████████████\ESC[38;5;17m████████████████████\ESC[38;5;252m██████\ESC[38;5;17m██\ESC[38;5;252m████\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;240m████\ESC[38;5;252m██\ESC[38;5;250m████\ESC[38;5;231m██\ESC[38;5;240m██\ESC[0m                                                   |"
+  putStrLn "|                                                    \ESC[38;5;240m██\ESC[38;5;124m██\ESC[38;5;88m████████████\ESC[38;5;17m████████████████████\ESC[38;5;252m██████\ESC[38;5;17m██\ESC[38;5;252m████\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;252m████\ESC[38;5;250m████\ESC[38;5;231m██\ESC[38;5;240m██\ESC[0m                                                   |"
+  putStrLn "|                                                      \ESC[38;5;240m██\ESC[38;5;124m██\ESC[38;5;88m████████████\ESC[38;5;17m████████████████████\ESC[38;5;252m████████████\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;252m██\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;240m██\ESC[0m                                                     |"
+  putStrLn "|                                                        \ESC[38;5;240m██\ESC[38;5;124m██\ESC[38;5;88m████████████\ESC[38;5;17m████████████████████\ESC[38;5;252m██████\ESC[38;5;17m██\ESC[38;5;252m████\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;250m██\ESC[38;5;231m██\ESC[38;5;240m██\ESC[0m                                                     |"
+  putStrLn "|                              \ESC[38;5;38m██████\ESC[38;5;31m████\ESC[38;5;38m██\ESC[38;5;31m██████████████████████████████████████████████████████████████████████████████\ESC[38;5;38m██████████\ESC[0m                                     |"
+  putStrLn "|                                  \ESC[38;5;31m████\ESC[38;5;38m████████\ESC[38;5;31m██████\ESC[38;5;38m████\ESC[38;5;31m██████████████\ESC[38;5;38m██████████████████\ESC[38;5;31m████\ESC[38;5;38m██████\ESC[38;5;31m██\ESC[38;5;38m████\ESC[38;5;31m████████████████████████\ESC[0m                                       |"
+  putStrLn "|                                    \ESC[38;5;38m████████████████████████████████████████████████████████████████████████████████████████\ESC[0m                                           |"
+
+  hSetEcho stdin False            -- Desactivar la impresión de teclas
+  hFlush stdout  -- Asegura que el mensaje se muestre antes de esperar la entrada
+  _ <- getLine  -- Espera a que el usuario presione ENTER
+  return ()
+
 
 
 --

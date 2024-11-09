@@ -14,20 +14,47 @@ import Data.IORef
 largoMatrix :: Int
 largoMatrix = 50
 
+
+getInput :: IO()
+getInput = do
+    c <- getChar
+    case c of
+        'r' -> do
+            gen <- getStdGen
+            let canon1 = Canon (30, 100, 20, 43, 0)
+            let canon2 = Canon (30, 100, 150, 43, 0)
+            let matrix = initialMatrix    -- Se invoca la matriz inicial (Graphics.hs)
+            let prob = fst (randomR (0,1) gen :: (Int, StdGen))
+            loop canon1 canon2 matrix gen prob
+        'q' -> return ()                -- Salir del bucle
+        _  -> getInput
+
 loop :: (Canon (Int, Int, Int, Int, Int)) -> (Canon (Int, Int, Int, Int, Int)) -> [[Char]] -> StdGen -> Int -> IO ()
+loop _ Dead _ _ _ = do
+    system "clear"
+    pantallaFin1
+    getInput
+
+
+loop Dead _ _ _ _ = do
+    system "clear"
+    pantallaFin2
+    getInput
+
+
 loop canon1 canon2 matrix gen 0 = do
     system "clear" -- Limpia la consola
-    let smallMatrix1 = tipoBarco 'r' (getAngle canon1)
-    let smallMatrix2 = tipoBarco 'l' (getAngle canon2)
-    let smallMatrix3 = mostrarDatos canon1 'r'
-    let smallMatrix4 = mostrarDatos canon2 'l'
-    let newMatrix1 = actualizaMatriz matrix smallMatrix1 ((getX canon1),(getY canon1))
-    let newMatrix2 = actualizaMatriz newMatrix1 smallMatrix2 ((getX canon2),(getY canon2))
-    let newMatrix3 = actualizaMatriz newMatrix2 smallMatrix3 (200,20)
-    let newMatrix4 = actualizaMatriz newMatrix3 smallMatrix4 (200,30)
-    mapM_ putStrLn newMatrix4 --imprime la matriz
-    putStrLn (show $ getFuel canon1)
-    putStrLn (show $ getFuel canon2)
+    let barcoIzq = tipoBarco 'r' (getAngle canon1)
+    let barcoDer = tipoBarco 'l' (getAngle canon2)
+    let datosIzq = mostrarDatos canon1 'r'
+    let datosDer = mostrarDatos canon2 'l'
+    let turnoMatrix = turno 0
+    let newMatrix1 = actualizaMatriz matrix barcoIzq ((getX canon1),(getY canon1))
+    let newMatrix2 = actualizaMatriz newMatrix1 barcoDer ((getX canon2),(getY canon2))
+    let newMatrix3 = actualizaMatriz newMatrix2 datosIzq (190,20)
+    let newMatrix4 = actualizaMatriz newMatrix3 datosDer (188,30)
+    let newMatrix5 = actualizaMatriz newMatrix4 turnoMatrix (197,35)
+    mapM_ putStrLn newMatrix5 --imprime la matriz
     if (getFuel canon1 <= 8) 
         then loop (resetFuel canon1) canon2 matrix gen 1
         else do 
@@ -45,11 +72,11 @@ loop canon1 canon2 matrix gen 0 = do
                 's' -> do
                     let newCanon = if (getAngle canon1) > 0 then  canon1 >>= (moveAngle (-1)) else canon1 -- Mover ángulo de cañón derecho hacia abajo
                     loop newCanon canon2 matrix gen 0
-                'p' -> do
+                'e' -> do
                     if ((getFuel canon1) < 20) 
                         then loop canon1 canon2 matrix gen 0
                     else do
-                        newCanon <- dispararProyectil canon1 canon2 'r' newMatrix2 gen -- Barco izquierdo dispara proyectil
+                        newCanon <- dispararProyectil canon1 canon2 'r' newMatrix5 gen -- Barco izquierdo dispara proyectil
                         let nextGen = snd (random gen :: (Int, StdGen))
                         loop (resetFuel canon1) newCanon matrix nextGen 1
                 't' -> do
@@ -59,17 +86,17 @@ loop canon1 canon2 matrix gen 0 = do
         
 loop canon1 canon2 matrix gen 1 = do
     system "clear" -- Limpia la consola
-    let smallMatrix1 = tipoBarco 'r' (getAngle canon1)
-    let smallMatrix2 = tipoBarco 'l' (getAngle canon2)
-    let smallMatrix3 = mostrarDatos canon1 'r'
-    let smallMatrix4 = mostrarDatos canon2 'l'
-    let newMatrix1 = actualizaMatriz matrix smallMatrix1 ((getX canon1),(getY canon1))
-    let newMatrix2 = actualizaMatriz newMatrix1 smallMatrix2 ((getX canon2),(getY canon2))
-    let newMatrix3 = actualizaMatriz newMatrix2 smallMatrix3 (200,20)
-    let newMatrix4 = actualizaMatriz newMatrix3 smallMatrix4 (200,30)
-    mapM_ putStrLn newMatrix4 --imprime la matriz
-    putStrLn (show $ getFuel canon1)
-    putStrLn (show $ getFuel canon2)
+    let barcoIzq = tipoBarco 'r' (getAngle canon1)
+    let barcoDer = tipoBarco 'l' (getAngle canon2)
+    let datosIzq = mostrarDatos canon1 'r'
+    let datosDer = mostrarDatos canon2 'l'
+    let turnoMatrix = turno 1
+    let newMatrix1 = actualizaMatriz matrix barcoIzq ((getX canon1),(getY canon1))
+    let newMatrix2 = actualizaMatriz newMatrix1 barcoDer ((getX canon2),(getY canon2))
+    let newMatrix3 = actualizaMatriz newMatrix2 datosIzq (190,20)
+    let newMatrix4 = actualizaMatriz newMatrix3 datosDer (188,30)
+    let newMatrix5 = actualizaMatriz newMatrix4 turnoMatrix (196,35)
+    mapM_ putStrLn newMatrix5 --imprime la matriz
     if (getFuel canon2 <= 8) 
         then loop canon1 (resetFuel canon2) matrix gen 0
         else do 
@@ -91,7 +118,7 @@ loop canon1 canon2 matrix gen 1 = do
                     if (getFuel canon2 < 20) 
                         then loop canon1 canon2 matrix gen 1
                     else do
-                        newCanon <- dispararProyectil canon2 canon1 'l' newMatrix2 gen -- Barco derecho dispara proyectil
+                        newCanon <- dispararProyectil canon2 canon1 'l' newMatrix5 gen -- Barco derecho dispara proyectil
                         let nextGen = snd (random gen :: (Int, StdGen))
                         loop newCanon (resetFuel canon2) matrix nextGen 0
                 't' -> do
@@ -101,6 +128,8 @@ loop canon1 canon2 matrix gen 1 = do
 ---------------------------------------------------------------------------
 main :: IO ()
 main = do
+    system "clear"
+    pantallaInicio
     hSetBuffering stdin NoBuffering -- Evitar el buffering en la entrada
     hSetEcho stdin False            -- Desactivar la impresión de teclas
     putStrLn "Presiona teclas (q para salir):"

@@ -2,6 +2,7 @@
 **NavalStrike** es un juego de pelea naval donde los jugadores controlan barcos de guerra y luchan en un campo de batalla. Utiliza física simple para simular los disparos y el daño.
 
 ## Tecnologías y Dependencias
+- **Sistema Operativo**: Linux
 - **Lenguaje**: Haskell
 - **Dependencias**: Haskell random (para generar números aleatorios)
 

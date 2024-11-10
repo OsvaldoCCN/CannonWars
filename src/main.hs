@@ -8,8 +8,7 @@ import System.Random
 import Data.IORef
 
 --------------------------------------------------------------------------------------------------
--- CONSTANTES
-
+-- Fucnión que obtiene el input en la pantalla final
 getInputFin :: IO()
 getInputFin = do
     c <- getChar
@@ -24,6 +23,7 @@ getInputFin = do
         'q' -> return ()                -- Salir del bucle
         _  -> getInputFin
 
+-- Fucnión que obtiene el input en la pantalla principal
 getInputTurno :: (Canon (Int, Int, Int, Int, Int)) -> (Canon (Int, Int, Int, Int, Int)) -> [[Char]] -> [[Char]] -> StdGen -> Int -> IO ()
 getInputTurno canon1 canon2 matrix newMatrix5 gen 0 = do
     c <- getChar
@@ -142,4 +142,4 @@ main = do
     let canon2 = Canon (30, 100, 150, 43, 0)
     let matrix = initialMatrix -- Se invoca la matriz inicial (Graphics.hs)
     let prob = fst (randomR (0,1) gen :: (Int, StdGen)) -- Se genera el primer turno aleatoriamente
-    loop canon1 canon2 matrix gen prob
+    loop canon1 canon2 matrix gen prob -- Se genera el loop inicial

@@ -4,7 +4,6 @@ module Graphics where
 import Tools
 import System.IO (hFlush, stdout)
 import System.IO (hSetEcho, hSetBuffering, stdin, BufferMode(NoBuffering))
---CONSTANTES
 
 -- Función que actualiza la matriz con los barcos
 actualizaMatriz :: [[Char]] -> [[Char]] -> (Int,Int)-> [[Char]]

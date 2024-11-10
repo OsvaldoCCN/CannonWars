@@ -11,7 +11,7 @@ import System.Random
 g :: Double
 g = 9.8
 
---Altp de la matriz principal
+--Alto de la matriz principal
 altoMatrix :: Int
 altoMatrix = 50
 

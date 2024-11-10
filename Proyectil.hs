@@ -11,18 +11,29 @@ import System.Random
 g :: Double
 g = 9.8
 
+--Altp de la matriz principal
+altoMatrix :: Int
+altoMatrix = 50
+
 --Largo de la matriz principal
 largoMatrix :: Int
-largoMatrix = 50
+largoMatrix = 169
+
 
 --Obtener Rango de hitbox
 getHitBox :: (Int, Int) -> ((Int, Int), (Int, Int))
-getHitBox (x, y) = ((x-11, x+11), (largoMatrix - y - 2, largoMatrix - y))
+getHitBox (x, y) = ((x-11, x+11), (altoMatrix - y - 2, altoMatrix - y))
 
 --Función que determina si un barco fue impactado o no
 fueImpactado :: (Int, Int) -> ((Int, Int), (Int, Int)) -> Bool
 fueImpactado (x, y) ((lim1, lim2), (lim3, lim4))
   | (x >= lim1 && x <= lim2) && (y >= lim3 && y <= lim4) = True
+  | otherwise = False
+
+impactaIceberg :: (Int, Int) -> Bool
+impactaIceberg (x,y)
+  | x >= 76 && x <= 104 && y < 9 = True
+  | x >= 79 && x <= 99 && y >= 9 && y <= 16 = True
   | otherwise = False
 
 -- Función que determina el ángulo según el modo del cañon
@@ -54,7 +65,7 @@ getDelta 'l' 3 = (-6, -1)
 getCannonCoord :: (Int, Int) -> Char -> Int -> (Int, Int) 
 getCannonCoord (x, y) h a = 
     let (dx, dy) = getDelta h a
-    in ((x + dx), (largoMatrix - (y + dy) - 1))
+    in ((x + dx), (altoMatrix - (y + dy) - 1))
 
 -- Marcar la posición de la bala en la matriz
 markMatrix :: [[Char]] -> (Int, Int) -> [[Char]]
@@ -85,7 +96,7 @@ simulateTrajectory canon2 v0 degree (x0, y0) matrix maxTime gen = simulateStep c
       | t > maxTime = return canon2  -- Termina la simulación y devuelve el estado final del cañón
       | otherwise = do
           let (x, y) = calculaPos v0 degree t x0 y0
-          if x >= 0 && x < length (head matrix) && y >= 0 && y < length matrix
+          if x >= 0 && x < largoMatrix && y >= 0 && y < length matrix && not (impactaIceberg (x,y))
             then do
               if (fueImpactado (x,y) (getHitBox (getX canon2, getY canon2))) then do 
                                 let newCanon = canon2 >>= impactar gen
@@ -96,7 +107,7 @@ simulateTrajectory canon2 v0 degree (x0, y0) matrix maxTime gen = simulateStep c
                 threadDelay 100000  -- Pausa de 0.5 segundos (100,000 microsegundos)
                 simulateStep canon2 (t + 0.1)  -- Llama recursivamente con el nuevo estado del cañón y el tiempo incrementado
             else do 
-              if (y >= 0) then simulateStep canon2 (t + 0.1) else return canon2  -- Si la posición de la bala sale de los límites, termina la simulación y devuelve el cañón
+              if (y >= 0 && not (impactaIceberg (x,y))) then simulateStep canon2 (t + 0.1) else return canon2  -- Si la posición de la bala sale de los límites, termina la simulación y devuelve el cañón
 
 
 dispararProyectil:: Canon (Int, Int, Int, Int, Int) -> Canon (Int, Int, Int, Int, Int)  -> Char -> [[Char]]-> StdGen -> IO (Canon(Int, Int, Int, Int, Int))

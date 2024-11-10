@@ -4,7 +4,6 @@ module Graphics where
 import Tools
 import System.IO (hFlush, stdout)
 import System.IO (hSetEcho, hSetBuffering, stdin, BufferMode(NoBuffering))
---CONSTANTES
 
 -- Función que actualiza la matriz con los barcos
 actualizaMatriz :: [[Char]] -> [[Char]] -> (Int,Int)-> [[Char]]
@@ -47,7 +46,7 @@ mostrarCombustible maxFuel fuel =
   in "\x1b[33m" ++ replicate fuelBarra '█' ++ "\x1b[0m" ++ replicate fuelRestante '░' ++ " " ++ show fuelPorcentaje ++ "%" ++ " (" ++ show fuel ++ ")"
 
 
--- Función mostrarDatos actualizada para usar las barras con colores.
+-- Función que muestra los datos de la partida actual
 mostrarDatos :: Canon (Int, Int, Int, Int, Int) -> Char -> [[Char]]
 mostrarDatos canon c = case c of
     'r' ->
@@ -61,6 +60,7 @@ mostrarDatos canon c = case c of
         , "Combustible: " ++ mostrarCombustible 100 (getFuel canon)
         ]
 
+-- Función que indica cuál es el turno actual
 turno :: Int  -> [[Char]]
 turno 1 = ["Turno Actual : B A R C O   D E R E C H O"]
 turno 0 = ["Turno Actual : B A R C O  I Z Q U I E R D O"]
@@ -175,7 +175,7 @@ initialMatrix =
           , "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                            "
           ]
 
-
+-- Función que devuelve la pantalla del final
 pantallaFin1 :: IO()
 pantallaFin1 = do
     putStrLn "|                                                                                                                                                                       |===================================="
@@ -272,7 +272,7 @@ pantallaFin2 = do
     putStrLn "|                                                                                                                                                                       |"
     putStrLn "|                                                                                                                                                                       |"
 
-
+-- Función que muestra la pantalla de inicio
 pantallaInicio :: IO()
 pantallaInicio = do
   putStrLn "|                                                                                                                                                                       |===================================="

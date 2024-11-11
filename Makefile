@@ -10,9 +10,16 @@ SOURCES = $(SRC_DIR)/main.hs  # Añade aquí otros archivos .hs en src si es nec
 # Crea las carpetas necesarias y compila el proyecto
 all: $(BUILD_DIR) $(BIN_DIR) $(EXECUTABLE)
 
+# Crea la carpeta build si no existe
+$(BUILD_DIR):
+	@mkdir -p $(BUILD_DIR)
+
+# Crea la carpeta bin si no existe
+$(BIN_DIR):
+	@mkdir -p $(BIN_DIR)
+
 # Compila el proyecto y guarda los .o en la carpeta build y el ejecutable en bin
-$(EXECUTABLE): $(SOURCES)
-	@mkdir -p $(BUILD_DIR) $(BIN_DIR)
+$(EXECUTABLE): $(SOURCES) | $(BUILD_DIR) $(BIN_DIR)
 	ghc -i$(SRC_DIR) -outputdir $(BUILD_DIR) -o $(EXECUTABLE) $(SOURCES)
 
 # Limpia los archivos generados (.hi, .o, y el ejecutable)

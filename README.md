@@ -18,8 +18,7 @@ make
 Ahora que el proyecto esta compilado, se puede ejecutar el proyecto con el siguiente comando:
 
 ```bash
-cd bin
-./navalStrike
+./bin/navalStrike
 ``` 
 
 ## Recomendaciones
